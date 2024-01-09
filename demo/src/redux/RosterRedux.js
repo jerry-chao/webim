@@ -3,6 +3,7 @@ import Immutable from 'seamless-immutable'
 import _ from 'lodash'
 import WebIM from '@/config/WebIM'
 import { I18n } from 'react-redux-i18n'
+import axios from 'axios';
 
 import CommonActions from '@/redux/CommonRedux'
 
@@ -19,16 +20,32 @@ const { Types, Creators } = createActions({
             dispatch(CommonActions.fetching())
             WebIM.conn.getContacts({
                 success: async(roster) => {
-                    console.log('roster', roster)
+                    console.log('roster', roster);
                     try{
-                        let rosterNames = roster.map(item => item.name)
-                        await WebIM.conn.fetchUserInfoById(rosterNames).then((res) => {
-                            let infos = res.data
-                            roster.forEach((item) => {
-                                item.info = infos[item.name]
-                            })
-                            return roster
-                        })
+                        let promises = roster.map(item => {
+                            let rosterDc = item.name.split("_")[0];
+                            if (WebIM.config.dc == rosterDc) {
+                                return WebIM.conn.fetchUserInfoById(item.name)
+                                    .then(res => {
+                                        item.info = res.data[item.name];
+                                        console.log('get metadata', item);
+                                        return res.data;
+                                    });
+                                } else {
+                                    return axios.get(`${WebIM.config.otherRestServer}/metadata/${WebIM.config.otherApp}/${item.name}`)
+                                    .then(res => {
+                                        item.info = res.data.data;
+                                        console.log('get metadata', item, res.data.data);
+                                        return res.data;
+                                    });
+                            }
+                        });
+                        await Promise.all(promises)
+                            .then(() => {
+                                console.log('get metadata done');
+                            });            
+                        console.log('roster result', roster);
+                        return roster;
                     }catch(e){
                         console.log('111',e);
                     }finally{
@@ -67,9 +84,18 @@ const { Types, Creators } = createActions({
 
     getUserInfo: id => {
         return (dispatch, getState) => {
-            return WebIM.conn.fetchUserInfoById(id).then((res)=>{
-                return res
-            })
+            let rosterDc = id.split("_")[0];
+            console.log('roster dc', rosterDc);
+            if (WebIM.config.dc == rosterDc) {
+                return WebIM.conn.fetchUserInfoById(id).then((res)=>{
+                    return res
+                });
+            } else {
+                return WebIM.conn.fetchUserInfoById(id).then((res)=>{
+                    return res
+                });
+            }
+
         }
     },
 

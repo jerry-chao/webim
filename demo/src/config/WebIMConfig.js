@@ -31,7 +31,7 @@ var config = {
    * Application AppKey
    */
     // easemob-demo#easeim
-    appkey: isSandBox ? 'easemob-demo#support' : 'easemob#easeim',
+    appkey: '1145230613161200#demo',
     /*
    * Application Host
    */
@@ -109,7 +109,7 @@ var config = {
    * 5 actual logging methods, ordered and available:
    * 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'
    */
-    loglevel: 'ERROR',
+    loglevel: 'DEBUG',
 
     /**
    * enable localstorage for history messages. For use in this demo
@@ -120,6 +120,11 @@ var config = {
 
     AgoraAppId: '15cb0d28b87b425ea613fc46f7c9f974', // 需要替换成自己的声网 appId，此 appId 有限量，仅供参考使用，同时获取声网 token 的接口仅能供此 appId 使用，换成自己的 appId 后需要自己去实现 app server 获取声网token。
 
-    usePassword: false,
+    usePassword: true,
+
+    dc: 'demo',
+    otherOrg: '1145230613161200',
+    otherApp: 'ebsapp2',
+    otherRestServer: 'http://106.75.214.248:8080/api/',
 }
 export default config
